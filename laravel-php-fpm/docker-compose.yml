@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  php:
+    build: ./docker/php
+    container_name: tgi-php
+    volumes:
+      - .:/var/www
+    networks:
+      - tgi-backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: tgi-nginx
+    ports:
+      - 81:80
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - tgi-backend
+
+  pgsql:
+    image: postgres
+    container_name: tgi-pgsql
+    volumes:
+      - pgsql-data:/var/lib/postgresql/data
+    environment:
+      TZ: "Europe/Kiev"
+      PGTZ: "Europe/Kiev"
+      POSTGRES_DB: tgi
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - 5432:5432
+    networks:
+      - tgi-backend
+
+  adminer:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: antago@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    container_name: tgi-pgadmin
+    ports:
+      - 8888:80
+    networks:
+      - tgi-backend
+
+  redis:
+    container_name: tgi-redis
+    image: redis:5.0
+    volumes:
+      - redis:/data
+    ports:
+      - 63791:6379
+    networks:
+      - tgi-backend
+
+networks:
+  tgi-backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.220.0/28
+
+volumes:
+  pgsql-data:
+    driver: local
+  redis:
+    driver: local
+  mysql-data:
+    driver: local

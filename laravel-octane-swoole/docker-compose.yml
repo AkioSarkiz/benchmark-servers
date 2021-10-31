@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+
+  php:
+    build: ./docker/php
+    container_name: app-php
+    environment:
+      XDEBUG_CONFIG: "remote_host=${XDEBUG_HOST:-192.168.220.1} remote_enable=1 remote_port=9001"
+      PHP_IDE_CONFIG: "serverName=Docker"
+    volumes:
+      - .:/var/www
+    networks:
+      - app-backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: app-nginx
+    ports:
+      - "100:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-backend
+
+
+  pgsql:
+    image: postgres
+    container_name: app-pgsql
+    volumes:
+      - pgsql-data:/var/lib/postgresql/data
+    environment:
+      TZ: "Europe/Kiev"
+      PGTZ: "Europe/Kiev"
+      POSTGRES_DB: app
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    networks:
+      - app-backend
+
+  adminer:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: antago@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    container_name: app-pgadmin
+    ports:
+      - "8989:80"
+    networks:
+      - app-backend
+
+  redis:
+    container_name: app-redis
+    image: redis:5.0
+    volumes:
+      - redis:/data
+    networks:
+      - app-backend
+
+networks:
+  app-backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.220.0/28
+
+volumes:
+  pgsql-data:
+    driver: local
+  redis:
+    driver: local

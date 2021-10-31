@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+
+  php:
+    tty: true
+    build: ./docker/php
+    container_name: app-php
+    volumes:
+      - .:/var/www
+    networks:
+      - app-backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: app-nginx
+    ports:
+      - "100:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-backend
+
+
+  pgsql:
+    image: postgres
+    container_name: app-pgsql
+    volumes:
+      - pgsql-data:/var/lib/postgresql/data
+    environment:
+      TZ: "Europe/Kiev"
+      PGTZ: "Europe/Kiev"
+      POSTGRES_DB: app
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    networks:
+      - app-backend
+
+networks:
+  app-backend:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.220.0/28
+
+volumes:
+  pgsql-data:
+    driver: local
