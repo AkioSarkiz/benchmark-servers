@@ -1,0 +1,17 @@
+tools:
+  - go-wrk:
+      lang: go
+      git: https://github.com/tsliwowicz/go-wrk
+
+  - httpit:
+      lang: go
+      git: https://github.com/gonetx/httpit
+
+  - pewpew:
+      lang: go
+      git: https://github.com/bengadbois/pewpew
+
+  - ab:
+      lang: C
+      git: https://github.com/CloudFundoo/ApacheBench-ab
+      webiste: https://httpd.apache.org/docs/2.4/programs/ab.html

@@ -23,8 +23,10 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libpq-dev \
     libmagickwand-dev \
-    ghostscript \
-    && pecl install imagick redis xdebug \
+    ghostscript
+
+# install php extensions
+RUN pecl install imagick redis xdebug \
     && docker-php-ext-enable imagick redis xdebug \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-configure zip \
@@ -32,19 +34,11 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) gd soap iconv pdo pdo_mysql pdo_pgsql pgsql zip mbstring exif pcntl \
     && docker-php-source delete
 
-# install swoole
-RUN cd /tmp \
-    && wget "https://pecl.php.net/get/swoole-${SWOOLE_VERSION}.tgz" \
-    && tar zxvf "swoole-${SWOOLE_VERSION}.tgz" \
-    && cd "swoole-${SWOOLE_VERSION}" \
-    && phpize \
-    && ./configure  --enable-openssl \
-    && make \
-    && make install
-
-# enable swoole
-RUN touch /usr/local/etc/php/conf.d/swoole.ini \
-    && echo 'extension=swoole.so' > /usr/local/etc/php/conf.d/swoole.ini
+# Install PHP Extensions
+RUN docker-php-ext-install zip \
+  && docker-php-ext-install sockets \
+  && docker-php-ext-install opcache \
+  && docker-php-ext-enable opcache
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -53,4 +47,4 @@ RUN useradd -u 1000 -ms /bin/bash -g www www
 
 USER www
 
-CMD ["/usr/local/bin/php", "/var/www/artisan", "octane:start", "--server=swoole", "--host=0.0.0.0", "--port=9000", "--max-requests=1000", "--workers=10"]
+CMD ["/usr/local/bin/php", "/var/www/artisan", "octane:start", "--server=roadrunner", "--host=0.0.0.0", "--port=9000", "--max-requests=1000", "--workers=10"]

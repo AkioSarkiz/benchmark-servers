@@ -48,13 +48,9 @@ RUN touch /usr/local/etc/php/conf.d/swoole.ini \
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-ADD ./php.ini /usr/local/etc/php/php.ini
-
 RUN groupadd -g 1000 www
 RUN useradd -u 1000 -ms /bin/bash -g www www
 
 USER www
 
-RUN npm i
-
-CMD ["/usr/local/bin/php", "/var/www/artisan", "octane:start", "--server=swoole", "--host=0.0.0.0", "--port=9000"]
+CMD ["/usr/local/bin/php", "/var/www/artisan", "octane:start", "--server=swoole", "--host=0.0.0.0", "--port=9000", "--max-requests=1000", "--workers=10"]

@@ -3,11 +3,9 @@ version: '3'
 services:
 
   php:
+    tty: true
     build: ./docker/php
     container_name: app-php
-    environment:
-      XDEBUG_CONFIG: "remote_host=${XDEBUG_HOST:-192.168.220.1} remote_enable=1 remote_port=9001"
-      PHP_IDE_CONFIG: "serverName=Docker"
     volumes:
       - .:/var/www
     networks:
@@ -41,25 +39,6 @@ services:
     networks:
       - app-backend
 
-  adminer:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: antago@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    container_name: app-pgadmin
-    ports:
-      - "8989:80"
-    networks:
-      - app-backend
-
-  redis:
-    container_name: app-redis
-    image: redis:5.0
-    volumes:
-      - redis:/data
-    networks:
-      - app-backend
-
 networks:
   app-backend:
     driver: bridge
@@ -70,6 +49,4 @@ networks:
 
 volumes:
   pgsql-data:
-    driver: local
-  redis:
     driver: local
